@@ -11,9 +11,6 @@ import android.widget.NumberPicker
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
-import org.json.JSONObject
-import org.jsoup.Connection
-import org.jsoup.Jsoup
 
 
 class MainActivity : AppCompatActivity() {
@@ -61,15 +58,28 @@ class WebAppInterface(private val mContext: Context, private val username: Strin
     fun getResponse(input: String): String {
         // send the request to the backend and get the response
         mInput = input
-        var result = backend()
-        return JSONObject(result.body()).getString("reply")
+        //        return JSONObject(result.body()).getString("reply")
+        return backend()
     }
 
-    fun backend(): Connection.Response{x`
-        val data = JSONObject(
-            mapOf("username" to username, "message" to mInput)).toString()
-        return Jsoup.connect("https://asia-south1-solvingforindia.cloudfunctions.net/detectintent").requestBody(data).header( "Content-Type", "application/json").method(
-            Connection.Method.POST).execute()
+    fun backend(): String{
+//        val data = JSONObject(
+//            mapOf("username" to username, "message" to mInput)).toString()
+//        return Jsoup.connect("https://asia-south1-solvingforindia.cloudfunctions.net/detectintent").requestBody(data).header( "Content-Type", "application/json").method(
+//            Connection.Method.POST).execute()
+        val regexPattern = Regex("Rs\\.\\s*(\\d+(\\.\\d+)?)") // Regex pattern to match "Rs." followed by an optional decimal number
+        val matchResult = regexPattern.find(mInput)
+
+        return if (matchResult != null) {
+            val amountString = matchResult.groupValues[1]
+            val amount = amountString.toDouble()
+    //            Toast.makeText(mContext,"Entry of Rs.${amount} Successful", Toast.LENGTH_SHORT).show()
+    //            println("Amount in rupees: $amount")
+            "Entry of Rs.${amount} Successful"
+        } else {
+            "Enter a valid message!!"
+    //            Toast.makeText(mContext,"Enter a valid message!!", Toast.LENGTH_SHORT).show()
+        }
     }
 
     @JavascriptInterface
@@ -140,10 +150,10 @@ class WebAppInterface(private val mContext: Context, private val username: Strin
     fun setBudgetBackend(type:String, budget:Int){
         // this function will set the budget in Backend
         Thread{
-            val data = JSONObject(
-                mapOf("username" to username, "category_name" to type, "budget_value" to budget)).toString()
-            val response = Jsoup.connect("https://asia-south1-solvingforindia.cloudfunctions.net/setbudget ").requestBody(data).header( "Content-Type", "application/json").method(
-                Connection.Method.POST).execute()
+//            val data = JSONObject(
+//                mapOf("username" to username, "category_name" to type, "budget_value" to budget)).toString()
+//            val response = Jsoup.connect("https://asia-south1-solvingforindia.cloudfunctions.net/setbudget ").requestBody(data).header( "Content-Type", "application/json").method(
+//                Connection.Method.POST).execute()
             activity.runOnUiThread{
                 Toast.makeText(mContext, "Budget set to ${budget}", Toast.LENGTH_SHORT).show()
             }
